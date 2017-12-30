@@ -32,12 +32,36 @@
   become: yes
   become_user: root
 
-- name: Give docker access to all users
-  file:
-    path: /var/run/docker.sock
-    mode: 0777
+#- name: Give docker access to all users
+#  file:
+#    path: /var/run/docker.sock
+#    mode: 0777
+#  become: yes
+#  become_user: root
+
+- name: Add user to docker group
+  user:
+    name: user
+    groups: docker
+    append: yes
   become: yes
   become_user: root
+
+- name: Reboot servers
+  shell: sleep 5 & shutdown -r now "Rebooting server"
+  ignore_errors: yes
+  async: 1
+  poll: 0
+  serial: 1
+  become: yes
+  become_user: root
+
+- name: Wait for servers after reboot
+  wait_for: 
+    host: "{{inventory_hostname}}"
+    state: started
+    timeout: 300
+  delegate_to: localhost
 
 - name: Run sample docker command to ensure docker runs
   shell: docker images
