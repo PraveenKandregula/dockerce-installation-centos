@@ -1,0 +1,10 @@
+- name: Installing pre-requisites
+  yum:
+    name: "{{item}}"
+    state: latest
+  become: yes
+  become_user: root
+  with_items:
+  - yum-utils
+  - device-mapper-persistent-data
+  - lvm2

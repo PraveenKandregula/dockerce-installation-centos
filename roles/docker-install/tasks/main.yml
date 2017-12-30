@@ -1,0 +1,43 @@
+- name: Install prerequisites
+  include_tasks: docker-prerequisites.yml
+
+- name: Ensure yum repo exists
+  #yum_repository: 
+  #  name: docker-ce
+  #  description: docker ce repo
+  #  file: external_repos
+  #  baseurl : https://download.docker.com/linux/centos/docker-ce.repo
+  #  gpgcheck: no
+  shell: yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+  become: yes
+  become_user: root
+
+- name: Update yum repos to get newly added repo reflected
+  shell: yum update docker-ce
+  become: yes
+  become_user: root
+
+- name: Install docker
+  yum:
+    name: docker-ce
+    state: installed
+  become: yes
+  become_user: root
+
+- name: Enable and start docker
+  systemd:
+    name: docker
+    enabled: yes
+    state: started
+  become: yes
+  become_user: root
+
+- name: Give docker access to all users
+  file:
+    path: /var/run/docker.sock
+    mode: 0777
+  become: yes
+  become_user: root
+
+- name: Run sample docker command to ensure docker runs
+  shell: docker images
